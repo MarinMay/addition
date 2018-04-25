@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Сложение чисел</title>
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="container">
+    <div class="sum">
+      <span class="number" id="number-a"></span>
+
+      <span class="operation">+</span>
+
+      <span class="number" id="number-b"></span>
+
+      <span class="equals">=</span>
+
+      <span class="answer">
+        <input class="answer__input answer__input--disabled" type="text">
+        <span class="answer__value">?</span>
+      </span>
+
+      <span class="sum__error error-message"></span>
+    </div>
+
+    <div class="visualization">
+      <div class="visualization__scale">
+        <div class="visualization__numbers-wrapper">
+        </div>
+
+        <img src="img/sprite.png" alt="числовая ось" width="875" height="83">
+      </div>
+    </div>
+  </main>
+
+  <template class="template" style="display: none">
+    <div class="visualization__number number-input">
+      <span class="number-input__value">
+        <input class="number-input__input" type="text">
+      </span>
+
+      <span class="error-message"></span>
+
+      <svg class="arrow-image" xmlns="http://www.w3.org/2000/svg" width="96" height="31" viewBox="0 0 96 31">
+       <g style="stroke:#ff0b8b; fill:none;">
+          <path d="M0 31A53 55 0 0 1 47 1a53 55 0 0 1 48 29" style="fill-rule:evenodd;"/>
+          <path d="M89 26l6 4v-8M104 21z"/>
+        </g>
+      </svg>
+    </div>
+  </template>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
