@@ -35,16 +35,17 @@
 
   getInitialData();
 
-//////////////////////////////////////////////////////////////////////////////////
   var SEGMENT_WIDTH = 39;
   var STARTING_SHIFT = 2;
   var START_COORDS = 0;
   var SECOND_SHIFT = 1;
+  var ACCPECT_RATIO_SVG = 0.323; // (svg height / svg width) оригинальные - размеры рисунка
   var vizualizationWrapper = document.querySelector('.visualization__numbers-wrapper');
   var templateArrow = document.querySelector('template');
 
   var wrapperArrowNumberA = templateArrow.content.querySelector('.visualization__number').cloneNode(true);
   var widthArrowNumberA = numberA * SEGMENT_WIDTH + STARTING_SHIFT;
+
 
   var wrapperArrowNumberB = templateArrow.content.querySelector('.visualization__number').cloneNode(true);
   var widthArrowNumberB = numberB * SEGMENT_WIDTH + SECOND_SHIFT;
@@ -59,9 +60,10 @@
   var inputAnswer = document.querySelector('.answer__input');
   var answerValue = document.querySelector('.answer__value');
 
-  // редактирует толщину стрелки
-  function setStrokeArc(width, arrow) {
+  // редактирует толщину стрелки от ее ширины
+  function setStrokeArc(width, arrowSvg) {
     var strokeStyle;
+
     if (width <= 125) {
       strokeStyle = '2px';
     } else if (width > 125 && width <= 160) {
@@ -72,7 +74,7 @@
       strokeStyle = '1%';
     }
 
-    arrow.style.strokeWidth = strokeStyle;
+    arrowSvg.style.strokeWidth = strokeStyle;
   }
 
   // добавляет элемент с инпутом и стрелкой
@@ -81,6 +83,7 @@
     vizualizationWrapper.appendChild(element);
     element.style.width = width + 'px';
     element.style.left = xCoord + 'px';
+    arrow.style.height = (width * ACCPECT_RATIO_SVG) + 'px';
     setStrokeArc(width, arrow);
   }
 
@@ -92,16 +95,15 @@
       errorMesage.textContent = 'Ответ должен быть числом';
       input.classList.add('input-error');
       return false;
+    }
+    errorMesage.textContent = '';
+    if (Number(input.value) !== number) {
+      input.classList.add('input-error');
+      return false;
     } else {
-      errorMesage.textContent = '';
-      if (Number(input.value) !== number) {
-        input.classList.add('input-error');
-        return false;
-      } else {
-        input.classList.remove('input-error');
-        input.classList.add('input-susses');
-        return true;
-      }
+      input.classList.remove('input-error');
+      input.classList.add('input-susses');
+      return true;
     }
   }
 
@@ -150,6 +152,7 @@
 
   function initInputAnswer() {
     answerValue.textContent = '';
+    inputAnswer.value = '';
     inputAnswer.classList.remove('answer__input--disabled');
     inputAnswer.focus();
     inputAnswer.addEventListener('input', onInputAnswerInput);
