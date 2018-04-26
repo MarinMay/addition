@@ -1,90 +1,31 @@
 'use strict';
 (function () {
-  var CONSTRAINTS_A = {
-    min: 6,
-    max: 9
-  };
-
-  var CONSTRAINTS_AMOUNT = {
-    min: 11,
-    max: 14
-  };
-
-  var containerNumberA = document.querySelector('#number-a');
-  var containerNumberB = document.querySelector('#number-b');
-  var numberA;
-  var numberB;
-  var answer;
-
-  // получает случайное число от min до max
-  function getNumber(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  function getInitialData() {
-    numberA = getNumber(CONSTRAINTS_A.min, CONSTRAINTS_A.max);
-    var contstraintsB = {
-      min: CONSTRAINTS_AMOUNT.min - numberA,
-      max: CONSTRAINTS_AMOUNT.max - numberA
-    };
-    numberB = getNumber(contstraintsB.min, contstraintsB.max);
-    answer = numberA + numberB;
-    containerNumberA.textContent = numberA;
-    containerNumberB.textContent = numberB;
-  }
-
-  getInitialData();
-
   var SEGMENT_WIDTH = 39;
   var STARTING_SHIFT = 2;
   var START_COORDS = 0;
   var SECOND_SHIFT = 1;
-  var ACCPECT_RATIO_SVG = 0.323; // (svg height / svg width) оригинальные - размеры рисунка
-  var vizualizationWrapper = document.querySelector('.visualization__numbers-wrapper');
+
   var templateArrow = document.querySelector('template');
+  var widthA = window.initData.numberA * SEGMENT_WIDTH + STARTING_SHIFT;
+  var widthB = window.initData.numberB * SEGMENT_WIDTH + SECOND_SHIFT;
+  var arrowNumberBCoordX = widthA - SECOND_SHIFT;
 
-  var wrapperArrowNumberA = templateArrow.content.querySelector('.visualization__number').cloneNode(true);
-  var widthArrowNumberA = numberA * SEGMENT_WIDTH + STARTING_SHIFT;
 
-
-  var wrapperArrowNumberB = templateArrow.content.querySelector('.visualization__number').cloneNode(true);
-  var widthArrowNumberB = numberB * SEGMENT_WIDTH + SECOND_SHIFT;
-  var arrowNumberBCoordX = widthArrowNumberA - SECOND_SHIFT;
-
-  var inputA = wrapperArrowNumberA.querySelector('.number-input__input');
-  var numberAValue = wrapperArrowNumberA.querySelector('.number-input__value');
-
-  var inputB = wrapperArrowNumberB.querySelector('.number-input__input');
-  var numberBValue = wrapperArrowNumberB.querySelector('.number-input__value');
+  var containerNumberA = document.querySelector('#number-a');
+  var containerNumberB = document.querySelector('#number-b');
 
   var inputAnswer = document.querySelector('.answer__input');
   var answerValue = document.querySelector('.answer__value');
 
-  // редактирует толщину стрелки от ее ширины
-  function setStrokeArc(width, arrowSvg) {
-    var strokeStyle;
-
-    if (width <= 125) {
-      strokeStyle = '2px';
-    } else if (width > 125 && width <= 160) {
-      strokeStyle = '1.5px';
-    } else if (width > 160 && width <= 280) {
-      strokeStyle = '';
-    } else if (width > 280) {
-      strokeStyle = '1%';
-    }
-
-    arrowSvg.style.strokeWidth = strokeStyle;
-  }
-
-  // добавляет элемент с инпутом и стрелкой
-  function addVizualizationNumber(element, width, xCoord) {
-    var arrow = element.querySelector('.arrow-image');
-    vizualizationWrapper.appendChild(element);
-    element.style.width = width + 'px';
-    element.style.left = xCoord + 'px';
-    arrow.style.height = (width * ACCPECT_RATIO_SVG) + 'px';
-    setStrokeArc(width, arrow);
+  function NumberObject(number, container, width, cb, startX) {
+    this.number = number;
+    this.containerNumber = container;
+    this.wrapperArrow = templateArrow.content.querySelector('.visualization__number').cloneNode(true);
+    this.widthArrow = width;
+    this.input = this.wrapperArrow.querySelector('.number-input__input');
+    this.inputNumber = this.wrapperArrow.querySelector('.number-input__value');
+    this.cb = cb;
+    this.startX = startX;
   }
 
   // проверяет введенное число
@@ -107,47 +48,34 @@
     }
   }
 
-  // ввод данных в инпут числа A
-  function onInputAInput() {
-    var isInputValid = validationInput(inputA, numberA);
+  // обработчик события input для чисел
+  NumberObject.prototype.onInputNumberInput = function () {
+    var isInputValid = validationInput(this.input, this.number);
     if (isInputValid) {
-      containerNumberA.classList.remove('number--error');
-      numberAValue.textContent = numberA;
-      initVizualizationNumberB();
+      this.containerNumber.classList.remove('number--error');
+      this.inputNumber.textContent = this.number;
+      this.cb();
     } else {
-      containerNumberA.classList.add('number--error');
+      this.containerNumber.classList.add('number--error');
     }
-  }
+  };
 
-  // ввод данных в инпут числа B
-  function onInputBInput() {
-    var isInputValid = validationInput(inputB, numberB);
-    if (isInputValid) {
-      containerNumberB.classList.remove('number--error');
-      numberBValue.textContent = numberB;
-      initInputAnswer();
-    } else {
-      containerNumberB.classList.add('number--error');
-    }
-  }
+  // добавляет элементы со стрелкой и инпутом
+  NumberObject.prototype.initVizualizationNumber = function () {
+    var obj = this;
+    window.arrow.addVizualizationNumber(obj.wrapperArrow, obj.widthArrow, obj.startX);
+    obj.input.focus();
+    obj.input.addEventListener('input', obj.onInputNumberInput.bind(obj));
+  };
+
+  var objB = new NumberObject(window.initData.numberB, containerNumberB, widthB, initInputAnswer, arrowNumberBCoordX);
+  var objA = new NumberObject(window.initData.numberA, containerNumberA, widthA, objB.initVizualizationNumber.bind(objB), START_COORDS);
 
   function onInputAnswerInput() {
-    var isInputValid = validationInput(inputAnswer, answer);
+    var isInputValid = validationInput(inputAnswer, window.initData.answer);
     if (isInputValid) {
-      answerValue.textContent = answer;
+      answerValue.textContent = window.initData.answer;
     }
-  }
-
-  function initVizualizationNumberA() {
-    addVizualizationNumber(wrapperArrowNumberA, widthArrowNumberA, START_COORDS);
-    inputA.focus();
-    inputA.addEventListener('input', onInputAInput);
-  }
-
-  function initVizualizationNumberB() {
-    addVizualizationNumber(wrapperArrowNumberB, widthArrowNumberB, arrowNumberBCoordX);
-    inputB.focus();
-    inputB.addEventListener('input', onInputBInput);
   }
 
   function initInputAnswer() {
@@ -158,5 +86,5 @@
     inputAnswer.addEventListener('input', onInputAnswerInput);
   }
 
-  setTimeout(initVizualizationNumberA, 1000);
+  setTimeout(objA.initVizualizationNumber.bind(objA), 1000);
 })();
